@@ -99,7 +99,7 @@
   fonts = {
     fontconfig = {
       defaultFonts = {
-        sansSerif = [ "Sarasa Fixed SC" ];
+        sansSerif = [ "Source Sans Pro" ];
         serif = [ "Source Serif Pro" ];
         monospace = [ "Iosevka Nerd Font" ];
       };
@@ -108,8 +108,8 @@
     enableGhostscriptFonts = true;
     fonts = with pkgs; [
       fira-code-symbols
-      sarasa-gothic
       source-serif-pro
+      source-sans-pro
       (nerdfonts.override { fonts = [ "FiraCode" "Iosevka" ]; })
     ];
   };
@@ -119,7 +119,7 @@
     xserver = {
       enable = true;
       layout = "us";
-      # videoDrivers = [ "nvidia" ];
+      videoDrivers = [ "nvidia" ];
 
       # Enable the Plasma 5 Desktop Environment.
       desktopManager = {
@@ -178,6 +178,7 @@
     wget
     neofetch
     ripgrep
+    tree
     htop
     git
     kitty
@@ -196,7 +197,10 @@
     lldb_14
     mold
     opam
-    (python3.withPackages (x: with x; [ pip ipython rzpipe ]))
+    (python3.withPackages (x: with x; [ pip pyyaml black ipython rzpipe ]))
+    cabal2nix
+    nix-prefetch-git
+    cabal-install
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -215,6 +219,12 @@
   # (/run/current-system/configuration.nix). This is useful in case you
   # accidentally delete configuration.nix.
   system = {
+    autoUpgrade = {
+      enable = true;
+      flake = "github:imbillow/nix.git";
+      randomizedDelaySec = "12h";
+      flags = [ "--impure" ];
+    };
     copySystemConfiguration = true;
 
     # This value determines the NixOS release from which the default
@@ -223,7 +233,7 @@
     # this value at the release version of the first install of this system.
     # Before changing this value read the documentation for this option
     # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-    stateVersion = "unstable"; # Did you read the comment?
+    stateVersion = "22.11"; # unstable ?
   };
 
 }
