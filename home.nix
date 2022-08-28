@@ -3,8 +3,15 @@
     username = "aya";
     homeDirectory = "/home/aya";
     stateVersion = "22.11";
-    packages = with pkgs; [ opam jetbrains.clion jetbrains.idea-ultimate ];
-    file = { };
+    packages = with pkgs; [
+      kitty
+      google-chrome
+      jetbrains.clion
+      jetbrains.idea-ultimate
+      spotify
+    ];
+    file = {
+    };
   };
   programs = {
     home-manager.enable = true;
