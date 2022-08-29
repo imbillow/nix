@@ -10,8 +10,7 @@
       jetbrains.idea-ultimate
       spotify
     ];
-    file = {
-    };
+    file = { };
   };
   programs = {
     home-manager.enable = true;
