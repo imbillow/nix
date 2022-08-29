@@ -12,22 +12,13 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    emacs-overlay.url = "github:nix-community/emacs-overlay";
-    # nix-doom-emacs.url = "github:nix-community/nix-doom-emacs";
     nur.url = "github:nix-community/NUR";
+    nixpkgs-mozilla = { url = "github:mozilla/nixpkgs-mozilla"; };
   };
 
-  outputs =
-    inputs @ { self
-    , nixpkgs
-    , nixpkgs-unstable
-    , nixos-hardware
-    , home-manager
-    , fenix
-    , nur
-    , ...
-    }: {
-      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, nixos-hardware
+    , nixpkgs-mozilla, home-manager, fenix, nur, ... }: {
+      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
 
       nixosConfigurations = {
         hoshi = nixpkgs.lib.nixosSystem {
@@ -36,6 +27,9 @@
           modules = [
             ./hardware-configuration.nix
             ./configuration.nix
+            ./cachix.nix
+            { nixpkgs.overlays = [ nur.overlay nixpkgs-mozilla.overlay ]; }
+
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
