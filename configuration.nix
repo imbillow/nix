@@ -2,45 +2,18 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }: {
-  imports = [
-    # Include the results of the hardware scan.
-    #./hardware-configuration.nix
-    #<home-manager/nixos>
-  ];
+{ config, pkgs, ... }:
 
-  fileSystems = {
-    "/".options =
-      [ "compress=zstd" "noatime" "ssd" "space_cache=v2" "discard=async" ];
-    "/home".options =
-      [ "compress=zstd" "noatime" "ssd" "space_cache=v2" "discard=async" ];
-    "/nix".options =
-      [ "compress=zstd" "noatime" "ssd" "space_cache=v2" "discard=async" ];
-    "/var/log".options =
-      [ "compress=zstd" "noatime" "ssd" "space_cache=v2" "discard=async" ];
-    "/.snapshots".options =
-      [ "compress=zstd" "noatime" "ssd" "space_cache=v2" "discard=async" ];
-  };
-
-  # Use the grub EFI boot loader.
-  boot = {
-    loader = {
-      efi = {
-        canTouchEfiVariables = true;
-        efiSysMountPoint = "/boot/efi";
-      };
-      grub = {
-        efiSupport = true;
-        useOSProber = true;
-        device = "nodev";
-      };
-    };
-    kernelPackages = pkgs.linuxPackages_zen;
-  };
+{
+  imports =
+    [
+      # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+      ./zfs.nix
+    ];
 
   networking = {
     hostName = "hoshi"; # Define your hostname.
-    # Pick only one of the below networking options.
     # wireless.enable = true;  # Enables wireless support via wpa_supplicant.
     networkmanager = {
       enable = true; # Easiest to use and most distros use this by default.
@@ -53,28 +26,28 @@
     #   };
     # };
 
-    # Configure network proxy if necessary
-    # proxy = {
-    #   default = "http://user:password@proxy:port/";
-    #   proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-    # };
+    proxy = {
+      # default = "http://user:password@proxy:port/";
+      default = "http://192.168.0.108:7890";
+      noProxy = "127.0.0.1,localhost,internal.domain";
+    };
 
-    # Open ports in the firewall.
     # firewall.allowedTCPPorts = [ ... ];
     # firewall.allowedUDPPorts = [ ... ];
-    # Or disable the firewall altogether.
     firewall.enable = true;
   };
 
-  # Set your time zone.
-  time.timeZone = "Asia/Shanghai";
+  time = {
+    timeZone = "Asia/Shanghai";
+    hardwareClockInLocalTime = true;
+  };
 
   nixpkgs = { config.allowUnfree = true; };
   nix = {
     settings = {
-      max-jobs = 24;
+      max-jobs = 16;
       substituters =
-        [ "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store" ];
+        [ "https://mirrors.ustc.edu.cn/nix-channels/store" ];
       experimental-features = [ "nix-command" "flakes" ];
     };
     extraOptions = ''
@@ -85,7 +58,7 @@
 
   # Select internationalisation properties.
   i18n = {
-    defaultLocale = "C.UTF-8";
+    defaultLocale = "en_US.UTF-8";
     inputMethod = {
       enabled = "ibus";
       ibus.engines = with pkgs.ibus-engines; [ rime ];
@@ -99,18 +72,16 @@
   fonts = {
     fontconfig = {
       defaultFonts = {
-        sansSerif = [ "Source Sans Pro" ];
-        serif = [ "Source Serif Pro" ];
-        monospace = [ "Iosevka Nerd Font" ];
+        #        sansSerif = [ "Source Sans Pro" ];
+        #        serif = [ "Source Serif Pro" ];
+        #        monospace = [ "Iosevka Nerd Font" ];
       };
     };
     fontDir.enable = true;
     enableGhostscriptFonts = true;
     fonts = with pkgs; [
       fira-code-symbols
-      source-serif-pro
-      source-sans-pro
-      (nerdfonts.override { fonts = [ "FiraCode" "Iosevka" ]; })
+      (nerdfonts.override { fonts = [ "FiraCode" ]; })
     ];
   };
 
@@ -119,7 +90,7 @@
     xserver = {
       enable = true;
       layout = "us";
-      videoDrivers = [ "nvidia" ];
+      videoDrivers = [ "nvidia" "amdgpu" ];
 
       # Enable the Plasma 5 Desktop Environment.
       desktopManager = {
@@ -147,7 +118,7 @@
     # Enable the OpenSSH daemon.
     openssh.enable = true;
     emacs = {
-      # enable = true;
+      enable = true;
       defaultEditor = true;
     };
   };
@@ -156,7 +127,11 @@
   sound.enable = true;
   hardware = {
     pulseaudio.enable = true;
-    opengl.enable = true;
+    opengl = {
+      enable = true;
+      driSupport = true;
+      driSupport32Bit = true;
+    };
     video = { hidpi.enable = true; };
   };
 
@@ -173,6 +148,19 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    bat
+    bat-extras.batman
+    bat-extras.batpipe
+    bat-extras.batgrep
+    bat-extras.batdiff
+    bat-extras.batwatch
+    bat-extras.prettybat
+    diff-so-fancy
+    fd
+    fzf
+    gh
+    jq
+    tldr
     neovim
     emacs
     wget
@@ -180,28 +168,14 @@
     ripgrep
     tree
     htop
+    direnv
     git
     cachix
-    rnix-lsp
-    nixfmt
-    gnumake
-    pkg-config
-    cmake
-    meson
-    ninja
-    clang_14
-    clang-tools_14
-    lld_14
-    lldb_14
-    mold
-    opam
-    (python3.withPackages (x: with x; [ pip pyyaml black ipython rzpipe ]))
-    cabal2nix
-    nix-prefetch-git
-    cabal-install
-    nodejs
-    shfmt
-    shellcheck
+    nixpkgs-fmt
+    google-chrome
+    vscode
+    kitty
+    jetbrains.clion
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -220,13 +194,13 @@
   # (/run/current-system/configuration.nix). This is useful in case you
   # accidentally delete configuration.nix.
   system = {
-    autoUpgrade = {
-      enable = true;
-      flake = "github:imbillow/nix.git";
-      randomizedDelaySec = "12h";
-      flags = [ "--impure" ];
-    };
-    copySystemConfiguration = true;
+    # autoUpgrade = {
+    #   enable = true;
+    #   flake = "github:imbillow/nix.git";
+    #   randomizedDelaySec = "12h";
+    #   flags = [ "--impure" ];
+    # };
+    # copySystemConfiguration = true;
 
     # This value determines the NixOS release from which the default
     # settings for stateful data, like file locations and database versions
@@ -234,7 +208,6 @@
     # this value at the release version of the first install of this system.
     # Before changing this value read the documentation for this option
     # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-    stateVersion = "22.11"; # unstable ?
+    stateVersion = "unstable"; # unstable ?
   };
-
 }
