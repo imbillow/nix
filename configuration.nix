@@ -45,10 +45,16 @@
   nixpkgs = { config.allowUnfree = true; };
   nix = {
     settings = {
+      auto-optimise-store = true;
       max-jobs = 16;
       substituters =
         [ "https://mirrors.ustc.edu.cn/nix-channels/store" ];
       experimental-features = [ "nix-command" "flakes" ];
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
     };
     extraOptions = ''
       keep-outputs = true
@@ -64,22 +70,26 @@
       ibus.engines = with pkgs.ibus-engines; [ rime ];
     };
   };
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkbOptions in tty.
-  # };
+  console = {
+    earlySetup = true;
+    # packages = with pkgs; [ terminus_font ];
+    # font = "ter-v16n";
+    # keyMap = "us";
+    useXkbConfig = true; # use xkbOptions in tty.
+  };
   fonts = {
     fontconfig = {
       defaultFonts = {
         #        sansSerif = [ "Source Sans Pro" ];
         #        serif = [ "Source Serif Pro" ];
-        #        monospace = [ "Iosevka Nerd Font" ];
+        monospace = [ "FiraCode Nerd Font Mono" ];
       };
     };
     fontDir.enable = true;
     enableGhostscriptFonts = true;
     fonts = with pkgs; [
+      source-code-pro
+      wqy_zenhei
       fira-code-symbols
       (nerdfonts.override { fonts = [ "FiraCode" ]; })
     ];
@@ -112,6 +122,19 @@
       libinput.enable = true;
     };
 
+    kmscon = {
+      enable = true;
+      hwRender = true;
+      fonts = [
+        {
+          name = "FiraCode Nerd Font Mono";
+          package = (pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; });
+        }
+      ];
+    };
+
+    fstrim.enable = true;
+
     # Enable CUPS to print documents.
     printing.enable = true;
 
@@ -119,7 +142,7 @@
     openssh.enable = true;
     emacs = {
       enable = true;
-      defaultEditor = true;
+      # defaultEditor = true;
     };
   };
 
@@ -133,6 +156,7 @@
       driSupport32Bit = true;
     };
     video = { hidpi.enable = true; };
+    # sensor.hddtemp.enable = true;
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -160,7 +184,10 @@
     fzf
     gh
     jq
+    parted
+    spotify
     tldr
+    tdesktop
     neovim
     emacs
     wget

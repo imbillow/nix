@@ -4,7 +4,7 @@
   boot = {
     supportedFilesystems = [ "zfs" ];
     # 1GB ARC
-    kernelParams = [ "zfs.zfs_arc_max=1884901888" ];
+    kernelParams = [ "zfs.zfs_arc_max=8589934592" ];
     kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
     zfs.extraPools = [ "bpool" "rpool" ];
     loader = {
@@ -22,8 +22,10 @@
           efiSupport = true;
           zfsSupport = true;
           useOSProber = true;
-          efiInstallAsRemovable = false;
+          # efiInstallAsRemovable = true;
           device = "nodev";
+          # default = "saved";
+          # trustedBoot.enable = true;
         };
     };
   };
